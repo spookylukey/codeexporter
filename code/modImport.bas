@@ -124,10 +124,10 @@ Skip1:
     Next i
 End Sub
 
-Private Function GetDirList(filepath As String, Optional attributes = vbNormal) As Variant
+Private Function GetDirList(filepath As String, Optional Attributes = vbNormal) As Variant
     Dim tmp As String
     GetDirList = Array()
-    tmp = DirS(filepath, attributes)
+    tmp = DirS(filepath, Attributes)
     Do Until tmp = ""
         ArrayPush GetDirList, tmp
         tmp = Dir()
