@@ -25,17 +25,17 @@ Option Explicit
 ' a directory
 
 ' called from menus/toolbars
-Public Sub ExportCode()
-    ExportWorkbookCode ActiveWorkbook
+Public Sub CodeExporter_Export()
+    CodeExporter_ExportCodeFromWorkbook ActiveWorkbook
 End Sub
 
 ' To automate exporting of code, use a routine like this.
 ' This requires codeexporter to be open or installed as an add-in
-Sub ExportMe()
-    Run "codeexporter.xla!ExportWorkbookCode", ThisWorkbook
-End Sub
+'Sub ExportMe()
+'    Run "codeexporter.xla!ExportWorkbookCode", ThisWorkbook
+'End Sub
 
-Sub ExportWorkbookCode(wkbk As Workbook)
+Public Sub CodeExporter_ExportCodeFromWorkbook(wkbk As Workbook)
     Dim dumpdir As String, defdir As Variant
     
     If wkbk.VBProject.Protection = vbext_pp_locked Then
@@ -72,7 +72,7 @@ Sub ExportWorkbookCode(wkbk As Workbook)
     End If
 End Sub
 
-Public Sub ExportModules(dirname As String, wkbk As Workbook)
+Private Sub ExportModules(dirname As String, wkbk As Workbook)
     Dim VBComp As VBComponent
     Dim fname As String
     
@@ -93,24 +93,3 @@ Public Sub ExportModules(dirname As String, wkbk As Workbook)
         VBComp.Export dirname & "\" & fname
     Next
 End Sub
-
-Function GetCustomProperty(wkbk As Workbook, pname As String) As Variant
-    On Error GoTo DoesntExist
-    GetCustomProperty = wkbk.CustomDocumentProperties(pname)
-    Exit Function
-    
-DoesntExist:
-    GetCustomProperty = Null
-    
-End Function
-    
-Sub SetCustomProperty(wkbk As Workbook, pname As String, ptype, val As Variant)
-    On Error GoTo DoesntExist
-    wkbk.CustomDocumentProperties(pname) = val
-    Exit Sub
-    
-DoesntExist:
-    On Error Resume Next
-    wkbk.CustomDocumentProperties.Add pname, False, ptype, val
-End Sub
-
