@@ -3,27 +3,9 @@ Option Explicit
 
 ' Module modGeneric
 ' Contains misc functions useful for any VB project
-' Current version: 0.8
+' Current version: 0.4
 '---------------------------------------------------------------------------------------
 ' ChangeLog
-
-' v 0.8
-' - fixed ArrayXXX functions to able be able to cope with objects
-'   (ArrayRemove, ArrayPush, ArraySearch, ArrayJoin, ArrayUnshift, ArrayShift)
-' - removed ArrayPushO
-' - added WriteConv
-
-' v 0.7
-' - fixed typo 'ArraySeach' -> 'ArraySearch'
-' - use  for Replace(ByRef) instead of Replace(ByVal)
-' - added ArraySearch2D()
-
-' v 0.6
-' - added HardWrap() (from APQPNotebook.xla)
-' - fixed NewArray() so it compiles!
-
-' v 0.5
-' - added NewArray()
 
 ' v 0.4
 ' - added ArrayPushO()
@@ -47,8 +29,8 @@ Option Explicit
 Private ScreenLock As Integer
 Private EventLock As Integer
 
-Function Replace(ByRef subject As String, f As String, r As String) As String
-    Replace = WorksheetFunction.Substitute(subject, f, r)
+Function Replace$(ByVal subject As String, f As String, r As String)
+    Replace$ = WorksheetFunction.Substitute(subject, f, r)
 End Function
 
 ' need to avoid use of Error statements in this function,
@@ -103,31 +85,12 @@ Function InArray(arr As Variant, search As Variant) As Boolean
 End Function
 
 ' no checking here either
-Function ArraySearch(ByRef arr As Variant, ByRef search As Variant) As Integer
+Function ArraySeach(ByRef arr As Variant, ByRef search As Variant) As Integer
     Dim i As Integer
-    ArraySearch = -1
+    ArraySeach = -1
     For i = LBound(arr) To UBound(arr)
-        If VarType(search) = vbObject Then
-            If search Is arr(i) Then
-                ArraySearch = i
-                Exit Function
-            End If
-        Else
-            If search = arr(i) Then
-                ArraySearch = i
-                Exit Function
-            End If
-        End If
-    Next i
-End Function
-
-' search a true 2-D array, looking at column 'col'
-Function ArraySearch2D(ByRef arr As Variant, ByRef search As Variant, col As Integer) As Integer
-    Dim i As Integer
-    ArraySearch2D = -1
-    For i = LBound(arr) To UBound(arr)
-        If search = arr(i, col) Then
-            ArraySearch2D = i
+        If search = arr(i) Then
+            ArraySeach = i
             Exit Function
         End If
     Next i
@@ -141,11 +104,7 @@ Sub ArrayPush(ByRef arr As Variant, item As Variant)
     End If
     i = UBound(arr)
     ReDim Preserve arr(i + 1)
-    If VarType(item) = vbObject Then
-        Set arr(i + 1) = item
-    Else
-        arr(i + 1) = item
-    End If
+    arr(i + 1) = item
 End Sub
 
 ' arr must be a variant containing an array
@@ -168,28 +127,16 @@ Sub ArrayUnshift(ByRef arr As Variant, item As Variant)
     End If
     ReDim Preserve arr(UBound(arr) + 1)
     For i = UBound(arr) To 1 Step -1
-        If VarType(arr(i - 1)) = vbObject Then
-            Set arr(i) = arr(i - 1)
-        Else
-            arr(i) = arr(i - 1)
-        End If
+        arr(i) = arr(i - 1)
     Next i
-    If VarType(item) = vbObject Then
-        Set arr(0) = item
-    Else
-        arr(0) = item
-    End If
+    arr(0) = item
 End Sub
 
 Sub ArrayShift(ByRef arr As Variant)
     Dim i As Integer
     If Not EmptyArray(arr) Then
         For i = 0 To UBound(arr) - 1
-            If VarType(arr(i + 1)) = vbObject Then
-                Set arr(i) = arr(i + 1)
-            Else
-                arr(i) = arr(i + 1)
-            End If
+            arr(i) = arr(i + 1)
         Next i
         ReDim Preserve arr(UBound(arr) - 1)
     End If
@@ -217,21 +164,14 @@ Function ArrayJoin(arr1 As Variant, arr2 As Variant)
         ArrayJoin = arr1
     Else
         t = UBound(arr1) + UBound(arr2) + 1
+        
         a = Array()
         ReDim a(t)
         For i = 0 To UBound(arr1)
-            If VarType(arr1(i) = vbObject) Then
-                Set a(i) = arr1(i)
-            Else
-                a(i) = arr1(i)
-            End If
+            a(i) = arr1(i)
         Next i
         For i = 0 To UBound(arr2)
-            If VarType(arr2(i) = vbObject) Then
-                Set a(i + UBound(arr1) + 1) = arr2(i)
-            Else
-                a(i + UBound(arr1) + 1) = arr2(i)
-            End If
+            a(i + UBound(arr1) + 1) = arr2(i)
         Next i
         ArrayJoin = a
     End If
@@ -256,11 +196,7 @@ Sub ArrayRemove(ByRef arr As Variant, starti As Integer, length As Integer)
             End If
         Else
             For i = starti To UBound(arr) - length
-                If VarType(arr(i + length)) = vbObject Then
-                    Set arr(i) = arr(i + length)
-                Else
-                    arr(i) = arr(i + length)
-                End If
+                arr(i) = arr(i + length)
             Next i
             ReDim Preserve arr(UBound(arr) - length)
         End If
@@ -360,24 +296,6 @@ End Function
 Sub ArrayClear(ByRef arr As Variant)
     arr = Array()
 End Sub
-
-' NewArray returns a new empty array with
-' size elements (elements from 0 to size - 1).
-' If supplied, initial will be the initial data
-Function NewArray(size As Integer, Optional initial As Variant = Empty) As Variant
-    Dim tmp As Variant, i As Integer
-    If size < 0 Then
-        NewArray = Array()
-    Else
-        ReDim tmp(size - 1)
-        If Not IsEmpty(initial) Then
-            For i = 0 To size - 1
-                tmp(i) = initial
-            Next i
-        End If
-        NewArray = tmp
-    End If
-End Function
 
 ' Quick sort algorithm.  Sorts array directly, not a copy
 Sub SortArray(ByRef arr As Variant, f As Integer, l As Integer)
@@ -552,12 +470,12 @@ Sub EnableEvents()
     End If
 End Sub
 
-' a safe version of DirS, to be used as replacement for first
+' a safe version of Dir, to be used as replacement for first
 ' call to Dir.  This will not produce errors if the drive
 ' does not exist
-Public Function DirS(PathName As String, Optional Attributes = vbNormal) As String
+Public Function DirS(PathName As String, Optional attributes = vbNormal) As String
     On Error GoTo BadPath
-    DirS = Dir(PathName, Attributes)
+    DirS = Dir(PathName, attributes)
     Exit Function
     
 BadPath:
@@ -583,34 +501,14 @@ Function ItoS(i As Integer) As String
     ItoS = VBA.Trim(VBA.str(i))
 End Function
 
-Function HardWrap(str As String, length As Integer, wrapstr As String, Optional breakstr As String = " ") As String
-    ' str is string to wrap
-    ' length is the number of characters to break at
-    ' wrapstr is string to insert (e.g. vba.chr(10) )
-    ' breakstr is the character that breaks are allowed after, space by default
-    Dim i As Integer, lastbreakchar As Integer, lastbreak As Integer
-    lastbreak = 0
-    lastbreakchar = 0
-    For i = 1 To Len(str)
-        If InStr(breakstr, Mid(str, i, 1)) <> 0 Then
-            lastbreakchar = i
-        End If
-        If i - lastbreak >= length And lastbreakchar <> 0 Then
-            HardWrap = HardWrap & IIf(HardWrap = "", "", wrapstr) & Mid(str, lastbreak + 1, lastbreakchar - lastbreak)
-            lastbreak = lastbreakchar
-            lastbreakchar = 0
-        ElseIf i = Len(str) Then
-            HardWrap = HardWrap & IIf(HardWrap = "", "", wrapstr) & Mid(str, lastbreak + 1)
-        End If
-    Next i
-End Function
-
-Function WriteConv(s As String) As String
-    ' Write # and Input # don't work if you write a string
-    ' containing double quotes (") - they get doubled by Write,
-    ' but the rest of the string is lost when trying to read
-    ' with Input.
-    ' Hence the need for this function with any string being
-    ' written.  For simplicity just convert to '
-    WriteConv = Replace(s, Chr(34), "'")
-End Function
+' object safe version of the above. It uses Set for assignment
+' arr must be a variant containing an array
+Sub ArrayPushO(ByRef arr As Variant, item As Object)
+    Dim i As Integer
+    If Not IsArray(arr) Then
+        arr = Array()
+    End If
+    i = UBound(arr)
+    ReDim Preserve arr(i + 1)
+    Set arr(i + 1) = item
+End Sub
