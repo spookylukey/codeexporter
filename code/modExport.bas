@@ -25,6 +25,10 @@ Sub ExportWorkbookCode(wkbk As Workbook)
     If IsNull(defdir) Then
         defdir = wkbk.Path
     End If
+    If Left$(defdir, 1) = "\" Then
+        ' relative dir - add workbook path
+        defdir = ThisWorkbook.Path & defdir
+    End If
     dumpdir = GetDirectory(CStr(defdir), 0, True, "Select folder to export modules to:")
     If dumpdir <> "" Then
         ExportModules dumpdir, wkbk
@@ -33,6 +37,11 @@ Sub ExportWorkbookCode(wkbk As Workbook)
             ' what is was before.  Also don't save it if it is the
             ' default
             If CStr(defdir) <> dumpdir Then
+                ' see if we can set a relative path
+                Debug.Print dumpdir, wkbk.Path, InStr(1, dumpdir, wkbk.Path)
+                If InStr(1, dumpdir, wkbk.Path) = 1 Then
+                    dumpdir = VBA.Mid(dumpdir, Len(wkbk.Path) + 1)
+                End If
                 SetCustomProperty wkbk, "CodeExporterSavePath", msoPropertyTypeString, dumpdir
             End If
         End If
