@@ -6,3 +6,8 @@ Attribute VB_Name = "ThisWorkbook"
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
+Private Sub Workbook_BeforeSave(ByVal SaveAsUI As Boolean, Cancel As Boolean)
+    ExportMe
+End Sub
+
+

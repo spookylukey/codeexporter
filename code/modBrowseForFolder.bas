@@ -3,7 +3,6 @@ Option Explicit
 
 
 
-
 Public Type BROWSEINFO
     hOwner As Long                 'Handle to the owner window for the dialog box.
     

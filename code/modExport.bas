@@ -1,4 +1,24 @@
 Attribute VB_Name = "modExport"
+' modExport.bas  Copyright 2003 Luke Plant
+' L.Plant.98@cantab.net
+
+' * This program is free software; you can redistribute it and/or modify
+' * it under the terms of the GNU General Public License as published by
+' * the Free Software Foundation; either version 2 of the License, or
+' * (at your option) any later version.
+' *
+' * This program is distributed in the hope that it will be useful,
+' * but WITHOUT ANY WARRANTY; without even the implied warranty of
+' * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+' * GNU General Public License for more details.
+' *
+' * You should have received a copy of the GNU General Public License
+' * along with this program; if not, write to the Free Software
+' * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+' The modules basAddrOf and modBrowseForFolder are taken from
+' Jim Rech's BrowseForFolder.xls demo file.
+
 Option Explicit
 
 ' Export all (or selected) modules in a project to
@@ -9,8 +29,12 @@ Public Sub ExportCode()
     ExportWorkbookCode ActiveWorkbook
 End Sub
 
-' use this directly if you need to save an add-in
-' (an add-in can never be the ActiveWorkbook)
+' To automate exporting of code, use a routine like this.
+' This requires codeexporter to be open or installed as an add-in
+Sub ExportMe()
+    Run "codeexporter.xla!ExportWorkbookCode", ThisWorkbook
+End Sub
+
 Sub ExportWorkbookCode(wkbk As Workbook)
     Dim dumpdir As String, defdir As Variant
     
@@ -63,16 +87,10 @@ Public Sub ExportModules(dirname As String, wkbk As Workbook)
         ElseIf VBComp.Type = vbext_ct_StdModule Then
             fname = fname & ".bas"
         End If
-        ' remove it first
-'        If Dir(CStr(dirname & "\" & fname), vbNormal) <> "" Then
-'            On Error GoTo CantDelete
-'            Kill dirname & "\" & fname
-'        End If
+        ' contrary to documentation, VBComp.Export seems to
+        ' simply overwrite any existing files, which is what we
+        ' want.
         VBComp.Export dirname & "\" & fname
-'        GoTo Skip1
-'CantDelete:
-'        MsgBox "Couldn't delete the existing file: " & VBA.Chr(10) & fname
-'Skip1:
     Next
 End Sub
 
@@ -94,11 +112,5 @@ Sub SetCustomProperty(wkbk As Workbook, pname As String, ptype, val As Variant)
 DoesntExist:
     On Error Resume Next
     wkbk.CustomDocumentProperties.Add pname, False, ptype, val
-  
 End Sub
 
-' To automate exporting of code, use a routine like this.
-' This requires codeexporter to be open or installed as an add-in
-Sub ExportMe()
-    Run "codeexporter.xla!ExportWorkbookCode", ThisWorkbook
-End Sub
