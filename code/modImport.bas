@@ -27,7 +27,7 @@ Public Sub CodeExporter_ImportCodeToWorkbook(wkbk As Workbook)
     End If
     If Left$(defdir, 1) = "\" Then
         ' relative dir - add workbook path
-        defdir = ThisWorkbook.Path & defdir
+        defdir = wkbk.Path & defdir
     End If
     dumpdir = GetDirectory(CStr(defdir), 0, True, "Select folder to import modules from:")
     If dumpdir <> "" Then
@@ -39,7 +39,6 @@ Public Sub CodeExporter_ImportCodeToWorkbook(wkbk As Workbook)
             ' default
             If CStr(defdir) <> dumpdir Then
                 ' see if we can set a relative path
-                Debug.Print dumpdir, wkbk.Path, InStr(1, dumpdir, wkbk.Path)
                 If InStr(1, dumpdir, wkbk.Path) = 1 Then
                     dumpdir = VBA.Mid(dumpdir, Len(wkbk.Path) + 1)
                 End If
@@ -88,7 +87,6 @@ Private Sub ImportModules(dirname As String, wkbk As Workbook)
     files = ArrayJoin(files, GetDirList(dirname & "\*.frm", vbNormal))
     
     For i = 0 To UBound(files)
-        Debug.Print files(i)
         If InArray(vbdocs, files(i)) Then
             ' don't import - insert the text into the relevant module
             ' and then delete the header lines
@@ -104,7 +102,17 @@ Private Sub ImportModules(dirname As String, wkbk As Workbook)
             On Error GoTo ImportFailed
             wkbk.VBProject.VBComponents.Import dirname & "\" & CStr(files(i))
             On Error GoTo 0
-            
+            ' there seems to be a bug in import/export - repeated imports/exports
+            ' result in leading new lines appearing in modules.  So we trim
+            ' all leading newlines
+            Set codemod = wkbk.VBProject.VBComponents(Left(CStr(files(i)), Len(files(i)) - 4)).CodeModule
+            Do
+                If codemod.Lines(1, 1) = "" Then
+                    codemod.DeleteLines 1, 1
+                Else
+                    Exit Do
+                End If
+            Loop
             GoTo Skip1
 ImportFailed:
             MsgBox "Importing file " & files(i) & " failed: " & VBA.Chr(10) & _

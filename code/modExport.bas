@@ -32,7 +32,7 @@ End Sub
 ' To automate exporting of code, use a routine like this.
 ' This requires codeexporter to be open or installed as an add-in
 'Sub ExportMe()
-'    Run "codeexporter.xla!ExportWorkbookCode", ThisWorkbook
+'    Run "codeexporter.xla!CodeExporter_ExportCodeFromWorkbook", ThisWorkbook
 'End Sub
 
 Public Sub CodeExporter_ExportCodeFromWorkbook(wkbk As Workbook)
@@ -51,7 +51,7 @@ Public Sub CodeExporter_ExportCodeFromWorkbook(wkbk As Workbook)
     End If
     If Left$(defdir, 1) = "\" Then
         ' relative dir - add workbook path
-        defdir = ThisWorkbook.Path & defdir
+        defdir = wkbk.Path & defdir
     End If
     dumpdir = GetDirectory(CStr(defdir), 0, True, "Select folder to export modules to:")
     If dumpdir <> "" Then
@@ -62,7 +62,6 @@ Public Sub CodeExporter_ExportCodeFromWorkbook(wkbk As Workbook)
             ' default
             If CStr(defdir) <> dumpdir Then
                 ' see if we can set a relative path
-                Debug.Print dumpdir, wkbk.Path, InStr(1, dumpdir, wkbk.Path)
                 If InStr(1, dumpdir, wkbk.Path) = 1 Then
                     dumpdir = VBA.Mid(dumpdir, Len(wkbk.Path) + 1)
                 End If
