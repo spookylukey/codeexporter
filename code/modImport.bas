@@ -65,7 +65,7 @@ Private Sub ImportModules(dirname As String, wkbk As Workbook)
     ' there - so we insert into those modules instead
     ' of importing it.
     
-    If MsgBox("Do you want to remove all modules first? (This cannot be undone)", vbYesNo) = vbYes Then
+    If MsgBox("Do you want to remove all modules first? (This cannot be undone)", vbYesNo, "CodeExporter") = vbYes Then
         For Each VBComp In wkbk.VBProject.VBComponents
           If VBComp.Type = vbext_ct_ClassModule Or _
             VBComp.Type = vbext_ct_MSForm Or _
@@ -106,17 +106,19 @@ Private Sub ImportModules(dirname As String, wkbk As Workbook)
             ' result in leading new lines appearing in modules.  So we trim
             ' all leading newlines
             Set codemod = wkbk.VBProject.VBComponents(Left(CStr(files(i)), Len(files(i)) - 4)).CodeModule
-            Do
-                If codemod.Lines(1, 1) = "" Then
-                    codemod.DeleteLines 1, 1
-                Else
-                    Exit Do
-                End If
-            Loop
+            If codemod.CountOfLines > 0 Then
+                Do
+                    If codemod.Lines(1, 1) = "" Then
+                        codemod.DeleteLines 1, 1
+                    Else
+                        Exit Do
+                    End If
+                Loop
+            End If
             GoTo Skip1
 ImportFailed:
             MsgBox "Importing file " & files(i) & " failed: " & VBA.Chr(10) & _
-            "Err " & Err.Number & ": " & Err.Description
+            "Err " & Err.Number & ": " & Err.Description, , "CodeExporter"
             On Error GoTo 0
 Skip1:
         End If
@@ -124,10 +126,10 @@ Skip1:
     Next i
 End Sub
 
-Private Function GetDirList(filepath As String, Optional Attributes = vbNormal) As Variant
+Private Function GetDirList(filepath As String, Optional attributes = vbNormal) As Variant
     Dim tmp As String
     GetDirList = Array()
-    tmp = DirS(filepath, Attributes)
+    tmp = DirS(filepath, attributes)
     Do Until tmp = ""
         ArrayPush GetDirList, tmp
         tmp = Dir()
