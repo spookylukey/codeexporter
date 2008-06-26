@@ -35,7 +35,7 @@ End Sub
 '    Run "codeexporter.xla!CodeExporter_ExportCodeFromWorkbook", ThisWorkbook
 'End Sub
 
-Public Sub CodeExporter_ExportCodeFromWorkbook(wkbk As Workbook)
+Public Sub CodeExporter_ExportCodeFromWorkbook(wkbk As Workbook, Optional useDefaultDir As Boolean = False)
     Dim dumpdir As String, defdir As Variant
     
     If wkbk.VBProject.Protection = vbext_pp_locked Then
@@ -47,13 +47,21 @@ Public Sub CodeExporter_ExportCodeFromWorkbook(wkbk As Workbook)
     ' if the workbook has a custom property 'CodeExporterSavePath' then use that
     defdir = GetCustomProperty(wkbk, "CodeExporterSavePath")
     If IsNull(defdir) Then
+        If useDefaultDir Then
+            MsgBox "No default directory could be found."
+            Exit Sub
+        End If
         defdir = wkbk.Path
     End If
     If Left$(defdir, 1) = "\" Then
         ' relative dir - add workbook path
         defdir = wkbk.Path & defdir
     End If
-    dumpdir = GetDirectory(CStr(defdir), 0, True, "Select folder to export modules to:")
+    If useDefaultDir Then
+        dumpdir = defdir
+    Else
+        dumpdir = GetDirectory(CStr(defdir), 0, True, "Select folder to export modules to:")
+    End If
     If dumpdir <> "" Then
         ExportModules dumpdir, wkbk
         If Not wkbk.ReadOnly Then
